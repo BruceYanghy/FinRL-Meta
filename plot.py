@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyfolio
-from finrl import config
-from finrl.finrl_meta.preprocessor.yahoodownloader import YahooDownloader
+from finrl.config import TRAIN_START_DATE
+from finrl.meta.preprocessor.yahoodownloader import YahooDownloader
 from pyfolio import timeseries
+
+from meta import config
 
 
 def get_daily_return(df, value_col_name="account_value"):
@@ -41,11 +43,11 @@ def backtest_stats(account_value, value_col_name="account_value"):
 
 
 def backtest_plot(
-        account_value,
-        baseline_start=config.START_TRADE_DATE,
-        baseline_end=config.END_DATE,
-        baseline_ticker="^DJI",
-        value_col_name="account_value",
+    account_value,
+    baseline_start=config.TRADE_START_DATE,
+    baseline_end=config.TRADE_END_DATE,
+    baseline_ticker="^DJI",
+    value_col_name="account_value",
 ):
     df = deepcopy(account_value)
     df["date"] = pd.to_datetime(df["date"])
@@ -62,7 +64,9 @@ def backtest_plot(
 
     with pyfolio.plotting.plotting_context(font_scale=1.1):
         pyfolio.create_full_tear_sheet(
-            returns=test_returns, benchmark_rets=baseline_returns, set_context=False
+            returns=test_returns,
+            benchmark_rets=baseline_returns,
+            set_context=False,
         )
 
 
@@ -73,6 +77,7 @@ def get_baseline(ticker, start, end):
 
 
 def trx_plot(df_trade, df_actions, ticker_list):
+
     df_trx = pd.DataFrame(np.array(df_actions["transactions"].to_list()))
     df_trx.columns = ticker_list
     df_trx.index = df_actions["date"]
@@ -87,7 +92,7 @@ def trx_plot(df_trade, df_actions, ticker_list):
         tic_plot = df_trade[
             (df_trade["tic"] == df_trx_temp.name)
             & (df_trade["date"].isin(df_trx.index))
-            ]["close"]
+        ]["close"]
         tic_plot.index = df_trx_temp.index
 
         plt.figure(figsize=(10, 8))
